@@ -1,9 +1,49 @@
 <!-- markdownlint-disable-file MD004 MD024 MD034 MD036 -->
 # CHANGE LOG
 
-## main branch
+## main(v0.7.0)
+
+- Docs: Update new-address-api.md (#360)
+- feat: worker 增加 `ADMIN_USER_ROLE` 配置, 用于配置管理员用户角色，此角色的用户可访问 admin 管理页面 (#363)
+- feat: worker 增加 `DISABLE_SHOW_GITHUB` 配置, 用于配置是否显示 github 链接
+- feat: worker 增加 `NO_LIMIT_SEND_ROLE` 配置, 用于配置可以无限发送邮件的角色
+
+## v0.6.1
+
+- pages github actions && 修复清理邮件天数为 0 不生效 by @tqjason (#355)
+- fix: imap proxy server 不支持 密码 by @dreamhunter2333 (#356)
+- worker 新增 `ANNOUNCEMENT` 配置, 用于配置公告信息 by @dreamhunter2333 (#357)
+- fix: telegram bot 新建地址默认选择第一个域名 by @dreamhunter2333 (#358)
+
+## v0.6.0
+
+### Breaking Changes
+
+DB changes: 增加用户角色表, 需要执行 `db/2024-07-14-patch.sql` 更新 `D1` 数据库
+
+### Changes
+
+worker 配置文件新增 `DEFAULT_DOMAINS`, `USER_ROLES`, `USER_DEFAULT_ROLE`, 具体查看文档 [worker配置](https://temp-mail-docs.awsl.uk/zh/guide/cli/worker.html#%E4%BF%AE%E6%94%B9-wrangler-toml-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
+
+- 移除 `apiV1` 相关代码和相关的数据库表
+- 更新 `admin/statistics` api, 添加用户统计信息
+- 更新地址的规则，只允许小写+数字，对于历史的地址在查询邮件时会进行 `lowercase` 处理
+- 增加用户角色功能，`admin` 可以设置用户角色(目前可配置每个角色域名和前缀)
+- admin 页面搜索优化, 回车自动搜索, 输入内容自动 trim
+
+## v0.5.4
+
+- 点击 logo 5 次进入 admin 页面
+- 修复 401 时无法跳转登录页面(admin 和 网站认证)
+
+## v0.5.3
 
 - 修复 smtp imap proxy sever 的一些 bug
+- 完善用户/admin 删除收件箱/发件箱的功能
+- admin 可以删除 发件权限记录
+- 添加中文邮件别名配置 `DOMAIN_LABELS` [文档](https://temp-mail-docs.awsl.uk/zh/guide/cli/worker.html)
+- 移除 `mail channels` 相关代码
+- github actions 增加 `FRONTEND_BRANCH` 变量用于指定部署的分支 (#324)
 
 ## v0.5.1
 
@@ -287,7 +327,7 @@ The `mails` table will be discarded, and the `raw` text of the new `mail` will b
 ```bash
 git checkout v0.2.0
 cd worker
-wrangler d1 execute dev  --file=../db/2024-04-09-patch.sql
+wrangler d1 execute dev  --file=../db/2024-04-09-patch.sql --remote
 pnpm run deploy
 cd ../frontend
 pnpm run deploy

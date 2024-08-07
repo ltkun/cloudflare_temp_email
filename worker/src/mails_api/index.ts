@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 
 import { HonoCustomType } from "../types";
-import { getBooleanValue, getJsonSetting, checkCfTurnstile } from '../utils';
-import { newAddress, handleListQuery, deleteAddressWithData } from '../common'
+import { getBooleanValue, getJsonSetting, checkCfTurnstile, getStringValue } from '../utils';
+import { newAddress, handleListQuery, deleteAddressWithData, getAddressPrefix, getAllowDomains } from '../common'
 import { CONSTANTS } from '../constants'
 import auto_reply from './auto_reply'
 import webhook_settings from './webhook_settings';
@@ -38,9 +38,10 @@ api.delete('/api/mails/:id', async (c) => {
     }
     const { address } = c.get("jwtPayload")
     const { id } = c.req.param();
+    // TODO: add toLowerCase() to handle old data
     const { success } = await c.env.DB.prepare(
         `DELETE FROM raw_mails WHERE address = ? and id = ? `
-    ).bind(address, id).run();
+    ).bind(address.toLowerCase(), id).run();
     return c.json({
         success: success
     })
@@ -48,6 +49,7 @@ api.delete('/api/mails/:id', async (c) => {
 
 api.get('/api/settings', async (c) => {
     const { address, address_id } = c.get("jwtPayload")
+    const user_role = c.get("userRolePayload")
     if (address_id && address_id > 0) {
         try {
             const db_address_id = await c.env.DB.prepare(
@@ -81,7 +83,8 @@ api.get('/api/settings', async (c) => {
     } catch (e) {
         console.warn("Failed to update address")
     }
-    const balance = await c.env.DB.prepare(
+    const is_no_limit_send_balance = user_role && user_role === getStringValue(c.env.NO_LIMIT_SEND_ROLE);
+    const balance = is_no_limit_send_balance ? 99999 : await c.env.DB.prepare(
         `SELECT balance FROM address_sender where address = ? and enabled = 1`
     ).bind(address).first("balance");
     return c.json({
@@ -117,7 +120,8 @@ api.post('/api/new_address', async (c) => {
         console.error(error);
     }
     try {
-        const res = await newAddress(c, name, domain, true);
+        const addressPrefix = await getAddressPrefix(c);
+        const res = await newAddress(c, name, domain, true, true, addressPrefix);
         return c.json(res);
     } catch (e) {
         return c.text(`Failed create address: ${(e as Error).message}`, 400)

@@ -90,7 +90,7 @@ const { t } = useI18n({
       saveToS3: 'Save to S3',
       multiAction: 'Multi Action',
       cancelMultiAction: 'Cancel Multi Action',
-      selectAll: 'Select All',
+      selectAll: 'Select All of This Page',
       unselectAll: 'Unselect All',
     },
     zh: {
@@ -109,7 +109,7 @@ const { t } = useI18n({
       saveToS3: '保存到S3',
       multiAction: '多选',
       cancelMultiAction: '取消多选',
-      selectAll: '全选',
+      selectAll: '全选本页',
       unselectAll: '取消全选',
     }
   }
@@ -147,6 +147,7 @@ const refresh = async () => {
     const { results, count: totalCount } = await props.fetchMailData(
       pageSize.value, (page.value - 1) * pageSize.value
     );
+    loading.value = true;
     data.value = await Promise.all(results.map(async (item) => {
       item.checked = false;
       return await processItem(item);
@@ -161,6 +162,8 @@ const refresh = async () => {
   } catch (error) {
     message.error(error.message || "error");
     console.error(error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -387,7 +390,8 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <template #2>
-          <n-card v-if="curMail" class="mail-item" :title="curMail.subject" style="overflow: auto; max-height: 100vh;">
+          <n-card :bordered="false" embedded v-if="curMail" class="mail-item" :title="curMail.subject"
+            style="overflow: auto; max-height: 100vh;">
             <n-space>
               <n-tag type="info">
                 ID: {{ curMail.id }}
@@ -434,7 +438,7 @@ onBeforeUnmount(() => {
             </iframe>
             <div v-else v-html="curMail.message" style="margin-top: 10px;"></div>
           </n-card>
-          <n-card class="mail-item" v-else>
+          <n-card :bordered="false" embedded class="mail-item" v-else>
             <n-result status="info" :title="t('pleaseSelectMail')">
             </n-result>
           </n-card>
@@ -483,7 +487,7 @@ onBeforeUnmount(() => {
       <n-drawer v-model:show="curMail" width="100%" placement="bottom" :trap-focus="false" :block-scroll="false"
         style="height: 80vh;">
         <n-drawer-content :title="curMail ? curMail.subject : ''" closable>
-          <n-card style="overflow: auto;">
+          <n-card :bordered="false" embedded style="overflow: auto;">
             <n-space>
               <n-tag type="info">
                 ID: {{ curMail.id }}

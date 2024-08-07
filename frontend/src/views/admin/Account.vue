@@ -9,8 +9,8 @@ import { NButton, NMenu } from 'naive-ui';
 import { MenuFilled } from '@vicons/material'
 
 const {
-    adminAuth, showAdminAuth, loading,
-    adminTab, adminMailTabAddress, adminSendBoxTabAddress
+    showAdminAuth, loading, adminTab,
+    adminMailTabAddress, adminSendBoxTabAddress
 } = useGlobalState()
 const message = useMessage()
 
@@ -94,6 +94,7 @@ const deleteEmail = async () => {
 
 const fetchData = async () => {
     try {
+        addressQuery.value = addressQuery.value.trim()
         const { results, count: addressCount } = await api.fetch(
             `/admin/address`
             + `?limit=${pageSize.value}`
@@ -251,10 +252,6 @@ watch([page, pageSize], async () => {
 })
 
 onMounted(async () => {
-    if (!adminAuth.value) {
-        showAdminAuth.value = true;
-        return;
-    }
     await fetchData()
 })
 </script>
@@ -268,7 +265,7 @@ onMounted(async () => {
             <span>
                 <p>{{ t("addressCredentialTip") }}</p>
             </span>
-            <n-card>
+            <n-card :bordered="false" embedded>
                 <b>{{ curEmailCredential }}</b>
             </n-card>
             <template #action>
@@ -283,7 +280,8 @@ onMounted(async () => {
             </template>
         </n-modal>
         <n-input-group>
-            <n-input v-model:value="addressQuery" clearable :placeholder="t('addressQueryTip')" />
+            <n-input v-model:value="addressQuery" clearable :placeholder="t('addressQueryTip')"
+                @keydown.enter="fetchData" />
             <n-button @click="fetchData" type="primary" tertiary>
                 {{ t('query') }}
             </n-button>
@@ -296,7 +294,7 @@ onMounted(async () => {
                 </template>
             </n-pagination>
         </div>
-        <n-data-table :columns="columns" :data="data" :bordered="false" />
+        <n-data-table :columns="columns" :data="data" :bordered="false" embedded />
     </div>
 </template>
 

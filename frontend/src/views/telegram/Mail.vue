@@ -6,7 +6,7 @@ import { api } from '../../api'
 import { onMounted, watch } from 'vue';
 import { processItem } from '../../utils/email-parser'
 
-const { telegramApp } = useGlobalState()
+const { telegramApp, loading } = useGlobalState()
 const route = useRoute()
 
 const curMail = ref({});
@@ -26,11 +26,15 @@ const fetchMailData = async () => {
                 mailId: route.query.mail_id
             })
         });
+        loading.value = true;
         return await processItem(res);
     }
     catch (error) {
         console.error(error);
         return {};
+    }
+    finally {
+        loading.value = false;
     }
 };
 
@@ -41,7 +45,7 @@ onMounted(async () => {
 
 <template>
     <div class="center">
-        <n-card v-if="curMail.message" style="max-width: 800px; overflow: auto;">
+        <n-card :bordered="false" embedded v-if="curMail.message" style="max-width: 800px; overflow: auto;">
             <n-tag type="info">
                 ID: {{ curMail.id }}
             </n-tag>

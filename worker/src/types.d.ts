@@ -1,3 +1,9 @@
+export type UserRole = {
+    domains: string[] | undefined | null,
+    role: string,
+    prefix: string | undefined | null
+}
+
 export type Bindings = {
     // bindings
     DB: D1Database
@@ -7,10 +13,15 @@ export type Bindings = {
 
     // config
     TITLE: string | undefined
+    ANNOUNCEMENT: string | undefined | null
     PREFIX: string | undefined
     MIN_ADDRESS_LEN: string | number | undefined
     MAX_ADDRESS_LEN: string | number | undefined
+    DEFAULT_DOMAINS: string | string[] | undefined
     DOMAINS: string | string[] | undefined
+    ADMIN_USER_ROLE: string | undefined
+    USER_DEFAULT_ROLE: string | UserRole | undefined
+    USER_ROLES: string | UserRole[] | undefined
     DOMAIN_LABELS: string | string[] | undefined
     PASSWORDS: string | string[] | undefined
     ADMIN_PASSWORDS: string | string[] | undefined
@@ -22,8 +33,10 @@ export type Bindings = {
     ENABLE_USER_DELETE_EMAIL: string | boolean | undefined
     ENABLE_INDEX_ABOUT: string | boolean | undefined
     DEFAULT_SEND_BALANCE: number | string | undefined
+    NO_LIMIT_SEND_ROLE: string | undefined | null
     ADMIN_CONTACT: string | undefined
     COPYRIGHT: string | undefined
+    DISABLE_SHOW_GITHUB: string | boolean | undefined
     FORWARD_ADDRESS_LIST: string | string[] | undefined
 
     // s3 config
@@ -32,10 +45,6 @@ export type Bindings = {
     S3_SECRET_ACCESS_KEY: string | undefined
     S3_BUCKET: string | undefined
     S3_URL_EXPIRES: number | undefined
-
-    // dkim
-    DKIM_SELECTOR: string | undefined
-    DKIM_PRIVATE_KEY: string | undefined
 
     // cf turnstile
     CF_TURNSTILE_SITE_KEY: string | undefined
@@ -64,7 +73,8 @@ type UserPayload = {
 
 type Variables = {
     userPayload: UserPayload,
-    jwtPayload: JwtPayload
+    userRolePayload: string | undefined | null,
+    jwtPayload: JwtPayload,
 }
 
 type HonoCustomType = {
